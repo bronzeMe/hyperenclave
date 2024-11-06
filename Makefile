@@ -43,7 +43,8 @@ ARCH ?= x86_64
 VENDOR ?= amd
 LOG ?=
 STATS ?= off
-SME ?= on
+SME ?= off
+MKTME ?= off
 INTR ?= on
 
 # do not support debug mode
@@ -55,6 +56,7 @@ export ARCH
 export VENDOR
 export STATS
 export SME
+export MKTME
 export INTR
 
 OBJDUMP ?= objdump
@@ -84,6 +86,14 @@ ifeq ($(SME), on)
   endif
   features += sme
 endif
+
+ifeq ($(MKTME), on)
+  ifneq ($(VENDOR), intel)
+    $(error `MKTME=on` is only available when `VENDOR=intel`)
+  endif
+  features += mktme
+endif
+
 
 ifeq ($(INTR), on)
   features += enclave_interrupt

@@ -26,4 +26,15 @@ pub const SME_C_BIT_OFFSET: usize = 1 << 47;
 #[cfg(not(feature = "sme"))]
 pub const SME_C_BIT_OFFSET: usize = 0;
 
+#[cfg(feature = "mktme")]
+pub const MKTME_KEYID_MASK: usize = 0xFC0000000000; // bit 51:46
+#[cfg(feature = "mktme")]
+pub const MKTME_KEYID_SHIFT: usize = 46;
+#[cfg(feature = "mktme")]
+pub const MKTME_KEYID_OFFSET: usize = 1 << 46;
+#[cfg(not(feature = "mktme"))]
+pub const MKTME_KEYID_MASK: usize = 0;
+#[cfg(not(feature = "mktme"))]
+pub const MKTME_KEYID_SHIFT: usize = 0;
+
 pub const HV_STACK_SIZE: usize = 512 * 1024; // 512 KB

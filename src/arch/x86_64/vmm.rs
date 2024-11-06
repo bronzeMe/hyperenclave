@@ -32,7 +32,7 @@ pub use vendor::{
 
 #[cfg(feature = "amd")]
 pub use vendor::{EncHW, HmacSWEncHW};
-
+//TODO: add intel mktme style EncHW
 pub trait VcpuAccessGuestState {
     // Architecture independent methods:
     fn regs(&self) -> &GuestRegisters;

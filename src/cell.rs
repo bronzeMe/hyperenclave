@@ -59,7 +59,7 @@ impl Cell {
         // preventing guest vm read out the encrypted view of EPC
         // from high addr with c-bit = 1
         // expected behavior: return plaintext view of the empty page
-        #[cfg(feature = "sme")]
+        #[cfg(any(feature = "sme", feature = "mktme"))]
         gpm.insert(MemoryRegion::new_with_empty_mapper(
             crate::memory::addr::phys_encrypted(hv_phys_start),
             hv_phys_size,
@@ -80,7 +80,7 @@ impl Cell {
                 epc_size,
                 MemFlags::READ | MemFlags::ENCRYPTED,
             ))?;
-            #[cfg(feature = "sme")]
+            #[cfg(any(feature = "sme", feature = "mktme"))]
             gpm.insert(MemoryRegion::new_with_empty_mapper(
                 crate::memory::addr::phys_encrypted(epc_start_hpa),
                 epc_size,
@@ -156,7 +156,7 @@ impl Cell {
                     MemFlags::READ | MemFlags::WRITE,
                 ))?;
                 // Support hardware encrypt when swap out EPC page to guest RAM
-                #[cfg(feature = "sme")]
+                #[cfg(any(feature = "sme", feature = "mktme"))]
                 hvm.insert(MemoryRegion::new_with_offset_mapper(
                     region.virt_start as HostVirtAddr,
                     region.phys_start as HostPhysAddr,

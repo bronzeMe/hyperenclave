@@ -16,7 +16,7 @@
 
 #![allow(dead_code)]
 
-use crate::consts::{HV_BASE, PAGE_SIZE, SME_C_BIT_OFFSET};
+use crate::consts::{HV_BASE, PAGE_SIZE, SME_C_BIT_OFFSET, MKTME_KEYID_MASK, MKTME_KEYID_SHIFT, MKTME_KEYID_OFFSET };
 
 pub type VirtAddr = usize;
 pub type PhysAddr = usize;
@@ -35,7 +35,26 @@ lazy_static! {
 }
 
 pub fn phys_encrypted(paddr: PhysAddr) -> PhysAddr {
-    paddr | SME_C_BIT_OFFSET
+    #[cfg(feature = "mktme")]
+    {
+        // if enable mktme, enable page encryption with default keyid = 1
+        phys_encrypted_with_keyid(paddr, 1)
+    }
+    #[cfg(not(feature = "mktme"))]
+    {
+        paddr | SME_C_BIT_OFFSET
+    }
+}
+
+fn phys_encrypted_with_keyid(paddr: PhysAddr, keyid: usize) -> PhysAddr {
+    // clear 51:46 bit
+    let cleared_paddr = paddr & !MKTME_KEYID_MASK;
+
+    // extract keyid bit
+    let keyid_bits = keyid & 0x3F;
+
+    // add keyid into paddr
+    cleared_paddr | (keyid_bits << MKTME_KEYID_SHIFT)
 }
 
 pub fn virt_to_phys(vaddr: VirtAddr) -> PhysAddr {
@@ -43,7 +62,15 @@ pub fn virt_to_phys(vaddr: VirtAddr) -> PhysAddr {
 }
 
 pub fn phys_to_virt(paddr: PhysAddr) -> VirtAddr {
-    (paddr & (SME_C_BIT_OFFSET.wrapping_sub(1))) + *PHYS_VIRT_OFFSET
+    #[cfg(feature = "mktme")]
+    {
+        // if turn on mktme, extract 45:0 of paddr
+        (paddr & (MKTME_KEYID_OFFSET.wrapping_sub(1))) + *PHYS_VIRT_OFFSET
+    }
+    #[cfg(not(feature = "mktme"))]
+    {
+        (paddr & (SME_C_BIT_OFFSET.wrapping_sub(1))) + *PHYS_VIRT_OFFSET
+    }
 }
 
 pub const fn align_down(addr: usize) -> usize {
